@@ -1,0 +1,6 @@
+node_modules/
+dayflow.db
+dayflow.db-shm
+dayflow.db-wal
+.env
+*.log
