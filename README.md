@@ -30,4 +30,4 @@ Developed as part of a hackathon project.
 
 ## License
 
-This project is developed for educational and hackathon purposes.
+This project is developed for educational and hackathon purposes.00000000000000000000

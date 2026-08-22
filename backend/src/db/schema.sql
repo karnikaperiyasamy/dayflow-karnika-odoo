@@ -1,0 +1,76 @@
+-- DAYFLOW HRMS SCHEMA
+
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  employee_id VARCHAR(50) UNIQUE NOT NULL,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(150) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN','HR','EMPLOYEE')),
+  email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  verification_token TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS employees (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  phone VARCHAR(30),
+  address TEXT,
+  date_of_birth DATE,
+  gender VARCHAR(20),
+  department VARCHAR(100) DEFAULT 'Unassigned',
+  designation VARCHAR(100) DEFAULT 'Unassigned',
+  joining_date DATE DEFAULT CURRENT_DATE,
+  employment_type VARCHAR(30) DEFAULT 'Full-Time',
+  profile_picture TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE','INACTIVE'))
+);
+
+CREATE TABLE IF NOT EXISTS attendance (
+  id SERIAL PRIMARY KEY,
+  employee_id INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  check_in TIMESTAMP,
+  check_out TIMESTAMP,
+  status VARCHAR(20) NOT NULL DEFAULT 'PRESENT' CHECK (status IN ('PRESENT','ABSENT','HALF_DAY','LEAVE')),
+  total_hours NUMERIC(5,2),
+  UNIQUE(employee_id, date)
+);
+
+CREATE TABLE IF NOT EXISTS leave_requests (
+  id SERIAL PRIMARY KEY,
+  employee_id INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  leave_type VARCHAR(20) NOT NULL CHECK (leave_type IN ('PAID','SICK','UNPAID')),
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  remarks TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','APPROVED','REJECTED')),
+  admin_comment TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS payroll (
+  id SERIAL PRIMARY KEY,
+  employee_id INTEGER UNIQUE NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  basic_salary NUMERIC(12,2) NOT NULL DEFAULT 0,
+  allowances NUMERIC(12,2) NOT NULL DEFAULT 0,
+  deductions NUMERIC(12,2) NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  message TEXT NOT NULL,
+  read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS documents (
+  id SERIAL PRIMARY KEY,
+  employee_id INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  name VARCHAR(200) NOT NULL,
+  file_url TEXT,
+  uploaded_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
